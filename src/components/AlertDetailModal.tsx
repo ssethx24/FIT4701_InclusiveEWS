@@ -85,11 +85,20 @@ export function AlertDetailModal({ alert, onClose }: AlertDetailModalProps) {
                 </RText>
               </View>
 
+              {extraTimeNeeded && (
+                <View style={[styles.noteBox, { backgroundColor: severity.watch.bg, borderColor: severity.watch.border }]}>
+                  <Ionicons name="hourglass-outline" size={16} color={severity.watch.fg} />
+                  <RText variant="secondary" color={severity.watch.fg} style={styles.noteText}>
+                    {getExtraTimeNote(alert.tone)}
+                  </RText>
+                </View>
+              )}
+
               <View style={styles.section}>
                 <RText variant="sectionHeading" color={colors.ink}>
                   What to do
                 </RText>
-                {alert.instructions.map((instruction, index) => (
+                {steps.map((instruction, index) => (
                   <View key={instruction} style={styles.instructionRow}>
                     <View style={[styles.instructionNumber, { backgroundColor: colors.surface2 }]}>
                       <RText variant="caption" color={colors.ink}>
@@ -103,11 +112,48 @@ export function AlertDetailModal({ alert, onClose }: AlertDetailModalProps) {
                 ))}
               </View>
 
-              <RButton label="Read aloud" variant="secondary" size="m" icon="volume-high-outline" iconPosition="leading" />
+              <View style={styles.actionsColumn}>
+                {simplifiedActions && primaryAction && (
+                  <RButton
+                    label={primaryAction.label}
+                    variant={primaryAction.variant}
+                    size="l"
+                    icon={primaryAction.icon}
+                    iconPosition="leading"
+                    onPress={onClose}
+                    fullWidth
+                  />
+                )}
+                <RButton
+                  label="Read aloud"
+                  variant="secondary"
+                  size="m"
+                  icon="volume-high-outline"
+                  iconPosition="leading"
+                  fullWidth={simplifiedActions}
+                />
+                {extraTimeNeeded && (
+                  <RButton
+                    label={helpSent ? 'Help request sent' : 'Request help'}
+                    variant="secondary"
+                    size="m"
+                    icon={helpSent ? 'checkmark-circle' : 'hand-left-outline'}
+                    iconPosition="leading"
+                    onPress={triggerHelp}
+                    accessibilityHint="Lets your emergency contacts know you may need assistance"
+                    fullWidth={simplifiedActions}
+                  />
+                )}
+              </View>
             </ScrollView>
           </SafeAreaView>
         )}
       </View>
+      <AlertFlashOverlay
+        visible={flashVisible}
+        message={alert?.title}
+        onDone={() => setFlashVisible(false)}
+      />
     </Modal>
   );
 }
@@ -152,7 +198,22 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: -8,
   },
+  noteBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: -4,
+  },
+  noteText: {
+    flex: 1,
+  },
   section: {
+    gap: 10,
+  },
+  actionsColumn: {
     gap: 10,
   },
   instructionRow: {
