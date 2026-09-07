@@ -299,4 +299,7 @@ const styles = StyleSheet.create({
   homeCard: {
     gap: 8,
   },
+  primaryActions: {
+    gap: 12,
+  },
 });
