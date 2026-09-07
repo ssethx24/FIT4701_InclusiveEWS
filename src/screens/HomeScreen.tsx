@@ -1,13 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, Vibration, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ConnectivityBanner } from '../components/ConnectivityBanner';
 import { RButton } from '../components/RButton';
 import { RCard } from '../components/RCard';
 import { RTabBar, TabKey } from '../components/RTabBar';
 import { RText } from '../components/RText';
 import { SeverityBadge } from '../components/SeverityBadge';
+import { useSettings } from '../context/SettingsContext';
 import { FAMILY } from '../data/family';
 import { useTheme } from '../theme/useTheme';
+import { getExtraTimeNote } from '../utils/personalisation';
+import { useConfirmAction } from '../utils/useConfirmAction';
 
 interface HomeScreenProps {
   onNavigate: (tab: TabKey) => void;
@@ -15,7 +20,15 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { colors, severity } = useTheme();
+  const { extraTimeNeeded, visualVibrationAlerts, lowConnectivityMode } = useSettings();
+  const [helpSent, triggerHelp] = useConfirmAction();
   const safeCount = FAMILY.filter((m) => m.status === 'safe').length;
+
+  useEffect(() => {
+    if (visualVibrationAlerts) {
+      Vibration.vibrate([0, 300, 150, 300]);
+    }
+  }, [visualVibrationAlerts]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>

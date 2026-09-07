@@ -44,7 +44,7 @@ function ToggleRow({ icon, title, description, value, onValueChange, isLast }: T
 }
 
 export function SettingsScreen({ onNavigate }: SettingsScreenProps) {
-  const { colors, severity } = useTheme();
+  const { colors } = useTheme();
   const {
     darkMode,
     setDarkMode,
@@ -265,5 +265,9 @@ const styles = StyleSheet.create({
     width: 8,
     height: 20,
     borderRadius: 3,
+  },
+  previewBlock: {
+    gap: 10,
+    alignItems: 'flex-start',
   },
 });
