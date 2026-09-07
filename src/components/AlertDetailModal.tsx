@@ -1,9 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSettings } from '../context/SettingsContext';
 import { MapAlert } from '../data/alerts';
 import { severityLevels } from '../theme/tokens';
 import { useTheme } from '../theme/useTheme';
+import { getExtraTimeNote, getSimplifiedPrimaryAction, getSimplifiedSteps } from '../utils/personalisation';
+import { useConfirmAction } from '../utils/useConfirmAction';
+import { AlertFlashOverlay } from './AlertFlashOverlay';
 import { RButton } from './RButton';
 import { RText } from './RText';
 import { SeverityBadge } from './SeverityBadge';
@@ -14,7 +19,19 @@ interface AlertDetailModalProps {
 }
 
 export function AlertDetailModal({ alert, onClose }: AlertDetailModalProps) {
-  const { colors, radius } = useTheme();
+  const { colors, severity, radius } = useTheme();
+  const { extraTimeNeeded, visualVibrationAlerts, simplifiedActions } = useSettings();
+  const [helpSent, triggerHelp] = useConfirmAction();
+  const [flashVisible, setFlashVisible] = useState(false);
+
+  useEffect(() => {
+    if (alert && visualVibrationAlerts && alert.tone === 'emergency') {
+      setFlashVisible(true);
+    }
+  }, [alert?.id, visualVibrationAlerts]);
+
+  const steps = alert ? (simplifiedActions ? getSimplifiedSteps(alert.tone) : alert.instructions) : [];
+  const primaryAction = alert ? getSimplifiedPrimaryAction(alert.tone) : null;
 
   return (
     <Modal visible={!!alert} animationType="slide" transparent onRequestClose={onClose}>
