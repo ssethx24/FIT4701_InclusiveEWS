@@ -1,18 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Vibration, View } from 'react-native';
 import MapView, { Circle, Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertDetailModal } from '../components/AlertDetailModal';
+import { ConnectivityBanner } from '../components/ConnectivityBanner';
 import { RButton } from '../components/RButton';
 import { RCard } from '../components/RCard';
 import { RTabBar, TabKey } from '../components/RTabBar';
 import { RText } from '../components/RText';
 import { SeverityBadge } from '../components/SeverityBadge';
+import { useSettings } from '../context/SettingsContext';
 import { HOME_IN_DANGER, HOME_LOCATION, MAP_ALERTS, MapAlert, withAlpha } from '../data/alerts';
 import { FullMapScreen } from './FullMapScreen';
 import { severityLevels } from '../theme/tokens';
 import { useTheme } from '../theme/useTheme';
+import { useConfirmAction } from '../utils/useConfirmAction';
 
 interface MapScreenProps {
   onNavigate: (tab: TabKey) => void;
@@ -20,15 +23,25 @@ interface MapScreenProps {
 
 export function MapScreen({ onNavigate }: MapScreenProps) {
   const { colors, severity } = useTheme();
+  const { extraTimeNeeded, visualVibrationAlerts, lowConnectivityMode } = useSettings();
   const [selectedAlert, setSelectedAlert] = useState<MapAlert | null>(null);
   const [safeSent, setSafeSent] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [helpSent, triggerHelp] = useConfirmAction();
 
   const handleImSafe = () => {
     Vibration.vibrate(200);
     setSafeSent(true);
     setTimeout(() => setSafeSent(false), 5000);
   };
+
+  useEffect(() => {
+    if (visualVibrationAlerts && HOME_IN_DANGER) {
+      Vibration.vibrate([0, 300, 150, 300]);
+    }
+  }, [visualVibrationAlerts]);
+
+  const oldestUpdateMinAgo = Math.min(...MAP_ALERTS.map((a) => a.updatedMinAgo));
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
@@ -56,6 +69,8 @@ export function MapScreen({ onNavigate }: MapScreenProps) {
               {MAP_ALERTS.length} active alerts near Melbourne CBD
             </RText>
           </View>
+
+          {lowConnectivityMode && <ConnectivityBanner lastUpdatedMinAgo={oldestUpdateMinAgo} />}
 
           <View style={[styles.mapContainer, { borderColor: colors.hairline }]}>
             <MapView
@@ -175,16 +190,30 @@ export function MapScreen({ onNavigate }: MapScreenProps) {
             </View>
           </RCard>
 
-          <RButton
-            label={safeSent ? 'Sent!' : "I'm Safe"}
-            variant="primary"
-            size="l"
-            icon={safeSent ? 'checkmark-done-circle' : 'checkmark-circle'}
-            iconPosition="leading"
-            onPress={handleImSafe}
-            accessibilityHint="Lets your family know you are safe"
-            fullWidth
-          />
+          <View style={styles.primaryActions}>
+            <RButton
+              label={safeSent ? 'Sent!' : "I'm Safe"}
+              variant="primary"
+              size="l"
+              icon={safeSent ? 'checkmark-done-circle' : 'checkmark-circle'}
+              iconPosition="leading"
+              onPress={handleImSafe}
+              accessibilityHint="Lets your family know you are safe"
+              fullWidth
+            />
+            {extraTimeNeeded && (
+              <RButton
+                label={helpSent ? 'Help request sent' : 'Request help'}
+                variant="secondary"
+                size="l"
+                icon={helpSent ? 'checkmark-circle' : 'hand-left-outline'}
+                iconPosition="leading"
+                onPress={triggerHelp}
+                accessibilityHint="Lets your emergency contacts know you may need assistance"
+                fullWidth
+              />
+            )}
+          </View>
         </ScrollView>
       </SafeAreaView>
       <RTabBar active="Map" onSelect={onNavigate} />
