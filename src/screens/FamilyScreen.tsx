@@ -1,12 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ConnectivityBanner } from '../components/ConnectivityBanner';
 import { RButton } from '../components/RButton';
 import { RCard } from '../components/RCard';
 import { RTabBar, TabKey } from '../components/RTabBar';
 import { RText } from '../components/RText';
 import { SeverityBadge } from '../components/SeverityBadge';
+import { useSettings } from '../context/SettingsContext';
 import { FAMILY } from '../data/family';
 import { useTheme } from '../theme/useTheme';
 
@@ -14,8 +16,11 @@ interface FamilyScreenProps {
   onNavigate: (tab: TabKey) => void;
 }
 
+const FAMILY_STEPS = ['Get children ready', 'Take essentials', 'Leave now'];
+
 export function FamilyScreen({ onNavigate }: FamilyScreenProps) {
   const { colors, severity } = useTheme();
+  const { simplifiedActions, lowConnectivityMode } = useSettings();
   const [selectedId, setSelectedId] = useState<string | null>('kai');
 
   const safeCount = FAMILY.filter((m) => m.status === 'safe').length + 1; // +1 for the user
