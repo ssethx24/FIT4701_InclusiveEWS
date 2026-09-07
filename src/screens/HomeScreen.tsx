@@ -57,6 +57,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             </View>
           </View>
 
+          {lowConnectivityMode && <ConnectivityBanner lastUpdatedMinAgo={2} />}
+
           <RCard
             style={[styles.alertCard, { borderLeftColor: severity.advice.border, borderLeftWidth: 6 }]}
             accessibilityRole="alert"
@@ -76,6 +78,15 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               Flash flooding expected along the Yarra River.
             </RText>
 
+            {extraTimeNeeded && (
+              <View style={[styles.noteBox, { backgroundColor: severity.watch.bg, borderColor: severity.watch.border }]}>
+                <Ionicons name="hourglass-outline" size={16} color={severity.watch.fg} />
+                <RText variant="secondary" color={severity.watch.fg} style={styles.noteText}>
+                  {getExtraTimeNote('advice')}
+                </RText>
+              </View>
+            )}
+
             <View style={styles.alertActions}>
               <RButton label="Read details" variant="primary" size="m" icon="chevron-forward" />
               <RButton
@@ -86,6 +97,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 iconPosition="leading"
                 accessibilityHint="Reads this alert aloud"
               />
+              {extraTimeNeeded && (
+                <RButton
+                  label={helpSent ? 'Help request sent' : 'Request help'}
+                  variant="secondary"
+                  size="m"
+                  icon={helpSent ? 'checkmark-circle' : 'hand-left-outline'}
+                  iconPosition="leading"
+                  onPress={triggerHelp}
+                  accessibilityHint="Lets your emergency contacts know you may need assistance"
+                />
+              )}
             </View>
           </RCard>
 
@@ -190,6 +212,17 @@ const styles = StyleSheet.create({
   },
   alertHeadline: {
     marginTop: -4,
+  },
+  noteBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+  },
+  noteText: {
+    flex: 1,
   },
   alertActions: {
     flexDirection: 'row',
