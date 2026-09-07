@@ -54,6 +54,28 @@ export function FamilyScreen({ onNavigate }: FamilyScreenProps) {
             </RText>
           </View>
 
+          {lowConnectivityMode && <ConnectivityBanner lastUpdatedMinAgo={12} />}
+
+          {simplifiedActions && (
+            <RCard style={[styles.stepsCard, { backgroundColor: severity.watch.bg, borderColor: severity.watch.border }]}>
+              <RText variant="eyebrowLabel" color={severity.watch.fg}>
+                SIMPLE STEPS
+              </RText>
+              <View style={styles.stepsRow}>
+                {FAMILY_STEPS.map((step, index) => (
+                  <Fragment key={step}>
+                    <RText variant="bodyEmphasis" color={severity.watch.fg}>
+                      {step}
+                    </RText>
+                    {index < FAMILY_STEPS.length - 1 && (
+                      <Ionicons name="arrow-forward" size={16} color={severity.watch.fg} />
+                    )}
+                  </Fragment>
+                ))}
+              </View>
+            </RCard>
+          )}
+
           <RCard
             style={[
               styles.statusCard,
@@ -188,6 +210,16 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     gap: 6,
+  },
+  stepsCard: {
+    gap: 10,
+    borderWidth: 1,
+  },
+  stepsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
   },
   statusCard: {
     gap: 14,
